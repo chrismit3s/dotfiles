@@ -26,6 +26,80 @@ if !empty(glob("/usr/bin/zsh"))
 endif
 
 
+"###############################  FUNCTIONS  ##################################"
+			" get current git branch
+function! GetGitBranch()
+	return system(
+\	"git rev-parse --abbrev-ref HEAD 2> /dev/null | tr -d '\n'")
+endfunction
+			" display branch only if there is one (for statusline)
+function! DisplayGitBranch()
+	let l:branchname = GetGitBranch()
+	return (strlen(l:branchname) > 0) ? ' Branch:'.l:branchname : ''
+endfunction
+
+
+"################################  PLUGINS  ###################################"
+filetype plugin on
+"********************************  PATHOGEN  **********************************"
+call pathogen#infect()
+"********************************  NERDTree  **********************************"
+			" toggle NERDTree
+nnoremap <silent> <C-n>      :NERDTreeToggle<CR>
+vnoremap <silent> <C-n>      :NERDTreeToggle<CR>
+inoremap <silent> <C-n> <C-o>:NERDTreeToggle<CR>
+augroup plugin_nerdtree
+	autocmd!
+			" Close NERDTree if its the only buffer left
+	autocmd bufenter *
+	\	if(winnr("$") == 1
+	\	&& exists("b:NERDTree")
+	\	&& b:NERDTree.isTabTree())
+	\|		q
+	\|	endif
+augroup END
+"********************************  AIRLINE  ***********************************"
+			" function to update airline statusline
+function! UpdateAirline()
+	let g:current_git_branch = DisplayGitBranch()
+endfunction
+augroup plugin_airline
+	autocmd!
+			" to update git branch in status line
+	autocmd vimenter     * let g:current_git_branch = DisplayGitBranch()
+	autocmd shellcmdpost * let g:current_git_branch = DisplayGitBranch()
+			" disable the AirlineToggleWhitespace in the airline
+	autocmd vimenter *
+	\	silent!
+	\|	AirlineToggleWhitespace
+	\|	redraw!
+augroup END
+			" use powerline fonts
+let g:airline_powerline_fonts = 1
+			" use deus airline theme
+let g:airline_theme = 'deus'
+			" custom statusline (see bit.ly/2rnzq8G)
+let g:airline_section_b = '%F %m%r%h%y'
+let g:airline_section_c = ''
+let g:airline_section_x = 'File:%t'
+let g:airline_section_x.= '%{g:current_git_branch}'
+let g:airline_section_y = 'Ln:%l/%L Col:%c'
+let g:airline_section_z = '%3l|%-2c'
+"*********************************  GUNDO  ************************************"
+nnoremap <silent> <C-g>      :GundoToggle<CR>
+vnoremap <silent> <C-g>      :GundoToggle<CR>
+inoremap <silent> <C-g> <C-o>:GundoToggle<CR>
+if has('python3')	" use python 3 if available
+	let g:gundo_prefer_python3 = 1
+endif
+			" map movement keys to the right (QWERTZ keyboard)
+let g:gundo_map_move_newer = 'l'
+let g:gundo_map_move_older = 'k'
+			" close  undo tree  when  focus  is returned  to another
+			" window
+let g:gundo_return_on_revert = 1
+
+
 "################################  VISUALS  ###################################"
 syntax on		" enable syntax highlighting
 colorscheme deus	" nice gruvbox-like colorscheme
@@ -212,77 +286,3 @@ nnoremap <C-W>ö <C-W>l
 nnoremap <silent> <m-c>      :tabnext<CR>
 vnoremap <silent> <m-c>      :tabnext<CR>
 inoremap <silent> <m-c> <C-o>:tabnext<CR>
-
-
-"###############################  FUNCTIONS  ##################################"
-			" get current git branch
-function! GetGitBranch()
-	return system(
-\	"git rev-parse --abbrev-ref HEAD 2> /dev/null | tr -d '\n'")
-endfunction
-			" display branch only if there is one (for statusline)
-function! DisplayGitBranch()
-	let l:branchname = GetGitBranch()
-	return (strlen(l:branchname) > 0) ? ' Branch:'.l:branchname : ''
-endfunction
-
-
-"################################  PLUGINS  ###################################"
-filetype plugin on
-"********************************  PATHOGEN  **********************************"
-call pathogen#infect()
-"********************************  NERDTree  **********************************"
-			" toggle NERDTree
-nnoremap <silent> <C-n>      :NERDTreeToggle<CR>
-vnoremap <silent> <C-n>      :NERDTreeToggle<CR>
-inoremap <silent> <C-n> <C-o>:NERDTreeToggle<CR>
-augroup plugin_nerdtree
-	autocmd!
-			" Close NERDTree if its the only buffer left
-	autocmd bufenter *
-	\	if(winnr("$") == 1
-	\	&& exists("b:NERDTree")
-	\	&& b:NERDTree.isTabTree())
-	\|		q
-	\|	endif
-augroup END
-"********************************  AIRLINE  ***********************************"
-			" function to update airline statusline
-function! UpdateAirline()
-	let g:current_git_branch = DisplayGitBranch()
-endfunction
-augroup plugin_airline
-	autocmd!
-			" to update git branch in status line
-	autocmd vimenter     * let g:current_git_branch = DisplayGitBranch()
-	autocmd shellcmdpost * let g:current_git_branch = DisplayGitBranch()
-			" disable the AirlineToggleWhitespace in the airline
-	autocmd vimenter *
-	\	silent!
-	\|	AirlineToggleWhitespace
-	\|	redraw!
-augroup END
-			" use powerline fonts
-let g:airline_powerline_fonts = 1
-			" use deus airline theme
-let g:airline_theme = 'deus'
-			" custom statusline (see bit.ly/2rnzq8G)
-let g:airline_section_b = '%F %m%r%h%y'
-let g:airline_section_c = ''
-let g:airline_section_x = 'File:%t'
-let g:airline_section_x.= '%{g:current_git_branch}'
-let g:airline_section_y = 'Ln:%l/%L Col:%c'
-let g:airline_section_z = '%3l|%-2c'
-"*********************************  GUNDO  ************************************"
-nnoremap <silent> <C-g>      :GundoToggle<CR>
-vnoremap <silent> <C-g>      :GundoToggle<CR>
-inoremap <silent> <C-g> <C-o>:GundoToggle<CR>
-if has('python3')	" use python 3 if available
-	let g:gundo_prefer_python3 = 1
-endif
-			" map movement keys to the right (QWERTZ keyboard)
-let g:gundo_map_move_newer = 'l'
-let g:gundo_map_move_older = 'k'
-			" close  undo tree  when  focus  is returned  to another
-			" window
-let g:gundo_return_on_revert = 1

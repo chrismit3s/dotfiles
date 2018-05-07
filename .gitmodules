@@ -1,9 +1,9 @@
 [submodule "vim/bundle/airline"]
 	path = vim/bundle/airline
-	url = github:vim-airline/vim-airline
+	url = https://github.com/vim-airline/vim-airline
 [submodule "vim/bundle/airline-themes"]
 	path = vim/bundle/airline-themes
-	url = github:vim-airline/vim-airline-themes
+	url = https://github.com/vim-airline/vim-airline-themes
 [submodule "vim/bundle/nerdtree"]
 	path = vim/bundle/nerdtree
 	url = https://github.com/scrooloose/nerdtree
@@ -12,19 +12,22 @@
 	url = https://github.com/vim-scripts/gundo
 [submodule "vim/bundle/deus"]
 	path = vim/bundle/deus
-	url = github:ajmwagar/vim-deus
+	url = https://github.com/ajmwagar/vim-deus
 [submodule "vim/bundle/apprentice"]
 	path = vim/bundle/apprentice
-	url = github:romainl/apprentice
+	url = https://github.com/romainl/apprentice
 [submodule "vim/bundle/challenger-deep"]
 	path = vim/bundle/challenger-deep
-	url = github:challenger-deep-theme/vim/
+	url = https://github.com/challenger-deep-theme/vim/
 [submodule "vim/bundle/lucius"]
 	path = vim/bundle/lucius
-	url = github:jonathanfilip/vim-lucius
+	url = https://github.com/jonathanfilip/vim-lucius
 [submodule "vim/bundle/wombat256"]
 	path = vim/bundle/wombat256
-	url = github:vim-scripts/wombat256.vim
+	url = https://github.com/vim-scripts/wombat256.vim
 [submodule "vim/bundle/monokai"]
 	path = vim/bundle/monokai
-	url = github:sickill/vim-monokai
+	url = https://github.com/sickill/vim-monokai
+[submodule "zsh/oh-my-zsh"]
+	path = zsh/oh-my-zsh
+	url = https://github.com/robbyrussell/oh-my-zsh

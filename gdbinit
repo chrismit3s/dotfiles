@@ -1,1 +1,1 @@
-source $HOME/.pwndbg/gdbinit.py
+source ~/.pwndbg/gdbinit.py

@@ -22,7 +22,7 @@ SAVEHIST=2000					# save 2000 lines in history
 setopt appendhistory beep			# enable  error beep and  append
 						# to history
 #*******************************  OH MY ZSH  **********************************#
-export ZSH=$ZDOTDIR/.oh-my-zsh			# set oh-my-zsh directory
+export ZSH=$ZDOTDIR/oh-my-zsh			# set oh-my-zsh directory
 source $ZSH/oh-my-zsh.sh			# needs to come  after oh-my-zsh
 						# config
 

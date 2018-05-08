@@ -1,16 +1,18 @@
 "##################################  TODO  ####################################"
-"[ ] text fold funtion for python
-"[ ] change c text fold function to (also rename it):
-"    "foo bar(baz){}-----------------------420 lines"
-"    [ ] add function to create string of given length with specifiv character
 "[ ] make vimrc fold like bit.ly/2JVSYri
 "    [ ] in .vimrc (or general in all .*rc) use marker folding
+"    [ ] add cheatsheet for commands
 "    [ ] reorder vimrc:
 "        TODO,   GENERAL,   UI,   TOOLS(searching, folding),   EDITING COMMANDS,
-"        MOVEMENT, PLUGINS
-"[ ] fix colorschemes (redownload repos and put into bundles)
-"[ ] add plugins
-"[ ] add cheatsheet for commands
+"        MOVEMENT, PLUGINS, CHEATSHEET
+"[ ] leader   mappings  for  certain   command   groups  (<leader>w  for  <C-w>,
+"    <leader>f for folding, ...)
+"[ ] text fold funtion for python with foldexpr
+"[D] fix colorschemes (redownload repos and put into bundles)
+"[D] change c text fold function to (also rename it):
+"    "foo bar(baz){} ----------------------- 420 lines"
+"    [D] add function to create string of given length with specific character
+"[R] add plugins
 
 
 "################################  GENERAL  ###################################"
@@ -36,6 +38,20 @@ endfunction
 function! DisplayGitBranch()
 	let l:branchname = GetGitBranch()
 	return (strlen(l:branchname) > 0) ? ' Branch:'.l:branchname : ''
+endfunction
+function! GetString(length, char)
+	" get empty string
+	let l:string = ''
+
+	" concat it with char length times
+	let l:i = 0
+	while l:i != a:length
+		let l:i += 1
+		let l:string .= a:char
+	endwhile
+
+	" return it
+	return l:string
 endfunction
 
 
@@ -81,7 +97,7 @@ let g:airline_theme = 'deus'
 			" custom statusline (see bit.ly/2rnzq8G)
 let g:airline_section_b = '%F %m%r%h%y'
 let g:airline_section_c = ''
-let g:airline_section_x = 'File:%t'
+let g:airline_section_x = 'File:%f'
 let g:airline_section_x.= '%{g:current_git_branch}'
 let g:airline_section_y = 'Ln:%l/%L Col:%c'
 let g:airline_section_z = '%3l|%-2c'
@@ -110,6 +126,7 @@ set sidescrolloff=7	" keep at least 7 characters left and right from cursor
 set cursorline		" highlight current line
 set list		" show unprintable characters in listchars
 set number		" show line number
+set numberwidth=3	" show at least a 3 digit number
 set background=dark	" nightmode
 set listchars+=trail:•	" show trailing spaces
 set nowrap		" dont wrap lines
@@ -126,28 +143,63 @@ set foldlevelstart=4	" start with 4 nested open folds
 			" toggle folds fast
 nnoremap <leader>f za
 "****************************  CUSTOM TEXT FOLD  ******************************"
-function! CustomTextFold()
-	" force syntax folding
-	set! foldmethod=syntax
+function! CustomCFolding()
+	" get start
+	let l:start = getline(v:foldstart)
 
-	" get start and end
-	let start_line = getline(v:foldstart)
-	let end_line = getline(v:foldend)
+	" match start line
+	let l:start = matchstr(start, '^\([^{]\+\){')
 
-	" Get each component
-	let start = substitute(
-		start_line,
-		'^\([ \t]*\)\([^{]\+\){',
-		'\1\2',_'')
-	let num_lines = v:foldend - v:foldstart + 1
-	if num_lines == 1
-		let line = "line"
-	else
-		let line = "lines"
-	endif
+	" calc folded lines
+	let l:lines = v:foldend - v:foldstart + 1
+
+	" concat start 
+	let l:start = l:start . '{ ' . num_lines ' } '
+
+	" concat end
+	let l:end = ' ' . l:lines . ' line' . ((l:lines == 1)?(''):('s')) . ' '
+
+	" get padding
+	let l:pad_len = 
+\		  winwidth(0)
+\		- strlen(l:start)
+\		- strlen(l:end)
+\		- &numberwidth
+\		- &foldcolumn
+\		- 1
+	let l:pad = GetString(l:pad_len, '-')
 
 	" return complete line
-	return start . "{ " . num_lines . " " . line . " }"
+	return l:start . l:pad . l:end
+endfunction
+function! CustomPythonFolding()
+	" get start
+	let l:start = getline(v:foldstart - 1)
+
+	" match start line
+	let l:start = matchstr(start, '^\([^:]\+\):')
+
+	" calc folded lines
+	let l:lines = v:foldend - v:foldstart + 1
+
+	" concat start 
+	let l:start = l:start . ': (' . num_lines . ') '
+
+	" concat end
+	let l:end = ' ' . l:lines . ' line' . ((l:lines == 1)?(''):('s')) . ' '
+
+	" get padding
+	let l:pad_len = 
+\		  winwidth(0)
+\		- strlen(l:start)
+\		- strlen(l:end)
+\		- &numberwidth
+\		- &foldcolumn
+\		- 1
+	let l:pad = GetString(l:pad_len, '-')
+
+	" return complete line
+	return l:start . l:pad . l:end
 endfunction
 
 
@@ -187,7 +239,7 @@ augroup filetype_c	" for C code
 	\|	setlocal noexpandtab
 	\|	setlocal listchars+=tab:\|\ 
 	\|	setlocal foldmethod=syntax
-	\|	setlocal foldtext=CustomTextFold()
+	\|	setlocal foldtext=CustomCFolding()
 augroup END
 augroup filetype_python	" for Python code
 	autocmd!
@@ -196,6 +248,7 @@ augroup filetype_python	" for Python code
 	\|	setlocal softtabstop=4
 	\|	setlocal expandtab
 	\|	setlocal foldmethod=indent
+	\|	setlocal foldtext=CustomPythonFolding()
 augroup END
 
 

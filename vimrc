@@ -1,51 +1,72 @@
-"##################################  TODO  ####################################"
-"[ ] make vimrc fold like bit.ly/2JVSYri
-"    [ ] in .vimrc (or general in all .*rc) use marker folding
-"    [ ] add cheatsheet for commands
-"    [ ] reorder vimrc:
-"        TODO,   GENERAL,   UI,   TOOLS(searching, folding),   EDITING COMMANDS,
-"        MOVEMENT, PLUGINS, CHEATSHEET
-"[ ] leader   mappings  for  certain   command   groups  (<leader>w  for  <C-w>,
-"    <leader>f for folding, ...)
-"[ ] text fold funtion for python with foldexpr
-"[D] fix colorschemes (redownload repos and put into bundles)
-"[D] change c text fold function to (also rename it):
-"    "foo bar(baz){} ----------------------- 420 lines"
-"    [D] add function to create string of given length with specific character
-"[R] add plugins
+" TODO - things to do {{{
+"  !![_] fix CustomMarkerFold()
+"   ![_] better mappings for splits and folds
+"    [_] add cheatsheet for commands
+"    [_] text fold funtion for python with foldexpr (https://bit.ly/2FUqkVp)
+"    [_] modify s/S so it works in visual block mode
+" }}}
 
+" GENERAL - basic settings {{{
+call pathogen#infect()		" load all plugins/colorschemes
+set lazyredraw			" only redraw when needed
+set autochdir			" use file path as working directory
+set confirm			" ask to save instead of complaining
+set title			" rename terminal
+set scrolloff=5			" keep 5 lines above and below cursor
+set nowrap			" dont wrap lines
+set backspace=2			" backspace over everything
+set listchars=			" clear list of unprintable characters
+" Mouse {{{
+set mouse=a			" enable the mouse (to disable mouse scroll)
+set mousehide			" hide the cursor
+" }}}
+" Indentation {{{
+set autoindent			" copy indentation of previous line
+set tabstop=8			" should not be changed
+" }}}
+" }}}
 
-"################################  GENERAL  ###################################"
-let mapleader=','	" set leader key
-filetype on		" enable filetype detection
-set lazyredraw		" redraw only when needed
-set autochdir		" use file path as working directory
-set confirm		" ask to save instead of complaining
-set listchars=		" empty listchars list
-			" use glorious zsh
-if !empty(glob("/usr/bin/zsh"))
-	set shell=/usr/bin/zsh
+" UI - how everything looks {{{
+" Vim {{{
+syntax on			" enable syntax highlighting
+colorscheme deus		" nice gruvbox-like colorscheme
+set background=dark		" nightmode
+set list			" show unprintable characters
+set listchars+=trail:•		" show trailing spaces
+set listchars+=tab:>-		" show only tabs
+set number			" show line number
+set numberwidth=3		" show at least a 3 digit number
+set showmatch			" highlight matching brace
+set cursorline			" highlight current line
+set colorcolumn=81		" highlight 81st column grey
+				" highlight characters after the 80th
+highlight OverLength ctermbg=red ctermfg=lightgrey
+match OverLength /\%81v.\+/
+" }}}
+" Airline {{{
+let g:airline_powerline_fonts=1	" use powerline fonts
+if exists('g:colors_name')	" use colorscheme as airline theme if available
+	let g:airline_theme=g:colors_name
+else
+	let g:airline_theme='default'
 endif
+				" custom statusline (see bit.ly/2rnzq8G)
+let g:airline_section_b='%F %m%r%h%y'
+let g:airline_section_c=''
+let g:airline_section_x='File:%f%{g:current_git_branch}'
+let g:airline_section_y='Ln:%l/%L Col:%c'
+let g:airline_section_z='%3l|%-2c'
+" }}}
+" }}}
 
-
-"###############################  FUNCTIONS  ##################################"
-			" get current git branch
-function! GetGitBranch()
-	return system(
-\	"git rev-parse --abbrev-ref HEAD 2> /dev/null | tr -d '\n'")
-endfunction
-			" display branch only if there is one (for statusline)
-function! DisplayGitBranch()
-	let l:branchname = GetGitBranch()
-	return (strlen(l:branchname) > 0) ? ' Branch:'.l:branchname : ''
-endfunction
-function! GetString(length, char)
-	" get empty string
+" FUNCTIONS - all functions {{{
+" General {{{
+function! GetString(len, char)	" returns a string containing char len times
 	let l:string = ''
 
 	" concat it with char length times
 	let l:i = 0
-	while l:i != a:length
+	while l:i != a:len
 		let l:i += 1
 		let l:string .= a:char
 	endwhile
@@ -53,111 +74,36 @@ function! GetString(length, char)
 	" return it
 	return l:string
 endfunction
-
-
-"################################  PLUGINS  ###################################"
-filetype plugin on
-"********************************  PATHOGEN  **********************************"
-call pathogen#infect()
-"********************************  NERDTree  **********************************"
-			" toggle NERDTree
-nnoremap <silent> <C-n>      :NERDTreeToggle<CR>
-vnoremap <silent> <C-n>      :NERDTreeToggle<CR>
-inoremap <silent> <C-n> <C-o>:NERDTreeToggle<CR>
-augroup plugin_nerdtree
-	autocmd!
-			" Close NERDTree if its the only buffer left
-	autocmd bufenter *
-	\	if(winnr("$") == 1
-	\	&& exists("b:NERDTree")
-	\	&& b:NERDTree.isTabTree())
-	\|		q
-	\|	endif
-augroup END
-"********************************  AIRLINE  ***********************************"
-			" function to update airline statusline
-function! UpdateAirline()
-	let g:current_git_branch = DisplayGitBranch()
+				" return the first captured group of a regex
+function! GetMatchGroup(expr, pattern)
+	return filter(matchlist(a:expr, a:pattern), '!empty(v:val)')[1]
 endfunction
-augroup plugin_airline
-	autocmd!
-			" to update git branch in status line
-	autocmd vimenter     * let g:current_git_branch = DisplayGitBranch()
-	autocmd shellcmdpost * let g:current_git_branch = DisplayGitBranch()
-			" disable the AirlineToggleWhitespace in the airline
-	autocmd vimenter *
-	\	silent!
-	\|	AirlineToggleWhitespace
-	\|	redraw!
-augroup END
-			" use powerline fonts
-let g:airline_powerline_fonts = 1
-			" use deus airline theme
-let g:airline_theme = 'deus'
-			" custom statusline (see bit.ly/2rnzq8G)
-let g:airline_section_b = '%F %m%r%h%y'
-let g:airline_section_c = ''
-let g:airline_section_x = 'File:%f'
-let g:airline_section_x.= '%{g:current_git_branch}'
-let g:airline_section_y = 'Ln:%l/%L Col:%c'
-let g:airline_section_z = '%3l|%-2c'
-"*********************************  GUNDO  ************************************"
-nnoremap <silent> <C-g>      :GundoToggle<CR>
-vnoremap <silent> <C-g>      :GundoToggle<CR>
-inoremap <silent> <C-g> <C-o>:GundoToggle<CR>
-if has('python3')	" use python 3 if available
-	let g:gundo_prefer_python3 = 1
-endif
-			" map movement keys to the right (QWERTZ keyboard)
-let g:gundo_map_move_newer = 'l'
-let g:gundo_map_move_older = 'k'
-			" close  undo tree  when  focus  is returned  to another
-			" window
-let g:gundo_return_on_revert = 1
-
-
-"################################  VISUALS  ###################################"
-syntax on		" enable syntax highlighting
-colorscheme deus	" nice gruvbox-like colorscheme
-set title		" rename terminal
-set showmatch		" show matching brace
-set scrolloff=5		" keep at least 5 lines above and below cursor
-set sidescrolloff=7	" keep at least 7 characters left and right from cursor
-set cursorline		" highlight current line
-set list		" show unprintable characters in listchars
-set number		" show line number
-set numberwidth=3	" show at least a 3 digit number
-set background=dark	" nightmode
-set listchars+=trail:•	" show trailing spaces
-set nowrap		" dont wrap lines
-set colorcolumn=81	" highlight 81st line grey
-			" highlight 81st char in a line red
-highlight OverLength ctermbg=red ctermfg=lightgrey
-match OverLength /\%81v.\+/
-
-
-"################################  FOLDING  ###################################"
-set foldcolumn=5	" add column for fold information
-set foldmethod=syntax	" fold lines syntax-based
-set foldlevelstart=4	" start with 4 nested open folds
-			" toggle folds fast
-nnoremap <leader>f za
-"****************************  CUSTOM TEXT FOLD  ******************************"
-function! CustomCFolding()
+" }}}
+" Git branch {{{
+function! GetGitBranch()	" returns current git branch
+	return system(
+\		 'git rev-parse --abbrev-ref HEAD '
+\		.'2> /dev/null | tr -d "\n"')
+endfunction
+function! StatuslineGitBranch()	" returns git branch ready for the statusline
+	let l:branchname = GetGitBranch()
+	return (strlen(l:branchname) > 0) ? ' Branch:'.l:branchname : ''
+endfunction
+" }}}
+" Text folds {{{
+function! CustomCFolding()	" returns folded line for c-like languages
 	" get start
 	let l:start = getline(v:foldstart)
-
-	" match start line
-	let l:start = matchstr(start, '^\([^{]\+\){')
+	let l:start = matchstr(l:start, '^[^{]\+')
 
 	" calc folded lines
 	let l:lines = v:foldend - v:foldstart + 1
+	let l:lines = l:lines . ' line' . ((l:lines == 1)?(''):('s'))
 
-	" concat start 
-	let l:start = l:start . '{ ' . num_lines ' } '
-
-	" concat end
-	let l:end = ' ' . l:lines . ' line' . ((l:lines == 1)?(''):('s')) . ' '
+	" concat start/end
+	let l:start = l:start . '{ ' . l:lines . ' } '
+	echom l:start
+	let l:end = ' ' . l:lines . ' '
 
 	" get padding
 	let l:pad_len = 
@@ -172,24 +118,21 @@ function! CustomCFolding()
 	" return complete line
 	return l:start . l:pad . l:end
 endfunction
-function! CustomPythonFolding()
+function! CustomPythonFolding()	" returns folded line for python
 	" get start
 	let l:start = getline(v:foldstart - 1)
-
-	" match start line
-	let l:start = matchstr(start, '^\([^:]\+\):')
+	let l:start = matchstr(l:start, '^\([^:]\+\):')
 
 	" calc folded lines
 	let l:lines = v:foldend - v:foldstart + 1
+	let l:lines = l:lines . ' line' . ((l:lines == 1)?(''):('s'))
 
-	" concat start 
-	let l:start = l:start . ': (' . num_lines . ') '
-
-	" concat end
-	let l:end = ' ' . l:lines . ' line' . ((l:lines == 1)?(''):('s')) . ' '
+	" concat start/end
+	let l:start = l:start . ': (' . l:lines . ') '
+	let l:end = ' ' . l:lines . ' '
 
 	" get padding
-	let l:pad_len = 
+	let l:pad_len =
 \		  winwidth(0)
 \		- strlen(l:start)
 \		- strlen(l:end)
@@ -201,82 +144,97 @@ function! CustomPythonFolding()
 	" return complete line
 	return l:start . l:pad . l:end
 endfunction
+function! CustomMarkerFolding()
+	" get start
+	let l:start = getline(v:foldstart - 1)
+	let l:lines = v:foldend - v:foldstart + 1
+	let l:lines = l:lines . ' line' . ((l:lines == 1)?(''):('s'))
 
+	if(match(l:start, '^[\S\W\D]{1,3} [^-]- [^{]{'))
+		" Large header: com head - end {_{
+		" get com
+		let l:com = GetMatchGroup(
+\			l:start,
+\			'^\([\S\W\D]\+\) [^-]- [^{]{')
+		echom 'COM #' . l:com . '#'
 
-"###############################  SEARCHING  ##################################"
-			" turn off search highlight
-nnoremap <silent> <leader>s :nohlsearch<CR>
-set incsearch		" search as charcters are entered
-set hlsearch		" highlight matches
-set ignorecase		" ignore case when searching
-set smartcase		" (with  ignorecase)   only  casesensitive  when  querry
-			" contains capital letters
+		" get head
+		let l:head = GetMatchGroup(
+\			l:start,
+\			'^[\S\W\D]\+ \([^-]\)- [^{]{')
+		echom 'HEAD #' . l:head . '#'
 
+		" get end
+		let l:end = GetMatchGroup(
+\			l:start,
+\			'^[\S\W\D]\+ [^-]- \([^{]\){')
+		echom 'END #' . l:end . '#'
 
-"#################################  MOUSE  ####################################"
-set mouse=a		" enable the mouse (to disable mouse scroll)
-set mousehide		" hide the cursor
-			" disable mouse wheel scroll
-map <ScrollWheelUp> <nop>
-map <S-ScrollWheelUp> <nop>
-map <C-ScrollWheelUp> <nop>
-map <ScrollWheelDown> <nop>
-map <S-ScrollWheelDown> <nop>
-map <C-ScrollWheelDown> <nop>
+		" get first padding
+		let l:pad_len =
+			  13
+\			- strlen(l:head)
+		echom 'PAD1 #' . l:pad_len . '#'
+		let l:pad1 = GetString(l:pad_len, ' ')
 
+		" get second padding
+		let l:pad_len =
+\			  winwidth(0)
+\			- strlen(l:com)
+\			- strlen(l:head)
+\			- strlen(l:end)
+\			- strlen(l:pad1)
+\			- strlen(l:end)
+\			- &numberwidth
+\			- &foldcolumn
+\			- 1
+		echom 'PAD2 #' . l:pad_len . '#'
+		let l:pad2 = GetString(l:pad_len, '-')
 
-"##############################  INDENTATION  #################################"
-set autoindent		" copy indentation of previous line
-set listchars=tab:>-	" show only tabs
-set tabstop=8		" should not be changed
-"*******************************  FILE TYPE  **********************************"
-filetype indent on	" enable loading indent files
-augroup filetype_c	" for C code
-	autocmd!
-	autocmd filetype c
-	\	setlocal shiftwidth=8
-	\|	setlocal softtabstop=8
-	\|	setlocal noexpandtab
-	\|	setlocal listchars+=tab:\|\ 
-	\|	setlocal foldmethod=syntax
-	\|	setlocal foldtext=CustomCFolding()
-augroup END
-augroup filetype_python	" for Python code
-	autocmd!
-	autocmd filetype python
-	\	setlocal shiftwidth=4
-	\|	setlocal softtabstop=4
-	\|	setlocal expandtab
-	\|	setlocal foldmethod=indent
-	\|	setlocal foldtext=CustomPythonFolding()
-augroup END
+		return
+\			  l:head
+\			. l:pad1
+\			. l:end
+\			. l:pad2
+\			. ' line'
+\			. ((l:lines == 1)?(''):('s'))
+\			. ' '
+	else
+		echom 'false'
+		" Small header: Xxxx {_{
+	endif
+endfunction
+" }}}
+" }}}
 
+" TOOLS - how tools behave {{{
+" Folding {{{
+set foldcolumn=5		" add column for fold information
+set foldmethod=syntax		" fold lines syntax-based
+set foldlevelstart=4		" start with 4 open folds
+" }}}
+" Searching {{{
+set incsearch			" search as charcters are entered
+set hlsearch			" highlight matches
+set ignorecase			" ignore case when searching
+set smartcase			" only if there are no capital letters in querry
+" }}}
+" }}}
 
-"############################  EDITING COMMANDS  ##############################"
-"*******************************  NORMALMODE  *********************************"
-			" insert single character with s/S
-nnoremap s i_<Esc>r
-nnoremap S a_<Esc>r
-			" shift + undo = redo
+" MAPPINGS - commands for editing {{{
+let mapleader=','		" set <leader> key
+				" insert single character with s/S
+nnoremap s i<Space><Esc>r
+nnoremap S a<Space><Esc>r
+vnoremap s I<Space><Esc>gvr
+vnoremap S A<Space><Esc>gvr
+				" shift + undo = redo
 nnoremap U <C-R>
-"*******************************  INSERTMODE  *********************************"
-set backspace=2		" backspace over everything
-			" when opening new files, start in insert
-augroup start_in_insert
-	autocmd!
-	autocmd bufnewfile * startinsert
-augroup END
-"*******************************  VISUALMODE  *********************************"
-set ttimeoutlen=10	" no delay when quitting visual mode with <Esc>
-
-
-
-"################################  MOVEMENT  ##################################"
-			" better tag-following in help
-nnoremap <C-f> <C-]>
-"*********************************  CURSOR  ***********************************"
-			" map  movement  characters  one to  the  right  (QWERTZ
-			" keyboard)
+				" copy from cursor to end of line with Y like D
+nmap Y yE
+" Movement {{{
+" Cursor {{{
+				" map movement characters one to the right
 nnoremap j h
 nnoremap k j
 nnoremap l k
@@ -289,7 +247,7 @@ onoremap j h
 onoremap k j
 onoremap l k
 onoremap ö l
-			" move more lines/character when capital
+				" move more lines/character when capital
 nnoremap J 3h
 nnoremap K 3j
 nnoremap L 3k
@@ -302,40 +260,184 @@ onoremap J 3h
 onoremap K 3j
 onoremap L 3k
 onoremap Ö 3l
-			" move in line when capital (in normal and visual)
+				" move in line
 nnoremap B ^
 nnoremap E $
 vnoremap B ^
 vnoremap E $
 onoremap B ^
 onoremap E $
-			" unmap $/^
+				" unmap $/^
 nnoremap ^ <nop>
 nnoremap $ <nop>
 vnoremap ^ <nop>
 vnoremap $ <nop>
 onoremap ^ <nop>
 onoremap $ <nop>
-"**********************************  PAGE  ************************************"
-			" scroll with <C-k/l>
+" }}}
+" Page {{{
+				" scroll with <C-k/l>
 nnoremap <C-l>      <C-e>
 nnoremap <C-k>      <C-y>
 vnoremap <C-l>      <C-e>
 vnoremap <C-k>      <C-y>
 inoremap <C-l> <C-o><C-e>
 inoremap <C-k> <C-o><C-y>
-"*********************************  SPLITS  ***********************************"
-set splitright		" open new splits on the right
-			" cycle through spilts
-nnoremap <C-c>      <C-w>w
-onoremap <C-c>      <C-w>w
-inoremap <C-c> <C-o><C-w>w
-			" easier navigations
-nnoremap <C-W>j <C-W>h
-nnoremap <C-W>k <C-W>j
-nnoremap <C-W>l <C-W>k
-nnoremap <C-W>ö <C-W>l
-"**********************************  TABS  ************************************"
-nnoremap <silent> <m-c>      :tabnext<CR>
-vnoremap <silent> <m-c>      :tabnext<CR>
-inoremap <silent> <m-c> <C-o>:tabnext<CR>
+" }}}
+" Splits {{{
+set splitright			" open new splits on the right
+				" cycle through spilts
+nnoremap <leader>wn      <C-w>w
+onoremap <leader>wn      <C-w>w
+inoremap <leader>wn <C-o><C-w>w
+nnoremap <leader>wp      <C-w>W
+onoremap <leader>wp      <C-w>W
+inoremap <leader>wp <C-o><C-w>W
+				" easier navigations
+nnoremap <leader>wj <C-W>h
+nnoremap <leader>wk <C-W>j
+nnoremap <leader>wl <C-W>k
+nnoremap <leader>wö <C-W>l
+" }}}
+" Tabs {{{
+				" cycle through tabs
+nnoremap <leader>tn      :tabnext<CR>
+onoremap <leader>tn      :tabnext<CR>
+inoremap <leader>tn <C-o>:tabnext<CR>
+nnoremap <leader>tp      :tabnext<CR>
+onoremap <leader>tp      :tabnext<CR>
+inoremap <leader>tp <C-o>:tabnext<CR>
+" }}}
+" }}}
+" Folding {{{
+				" toggle/open/close folds fast
+nnoremap <leader>ff za
+nnoremap <leader>fo zo
+nnoremap <leader>fc zc
+nnoremap <leader>fO zR
+nnoremap <leader>fC zM
+" }}}
+" Searching {{{
+				" turn off search highlight
+nnoremap <silent> <leader>s :nohlsearch<CR>
+" }}}
+" Mouse {{{
+				" disable mouse wheel scroll
+map <ScrollWheelUp> <nop>
+map <S-ScrollWheelUp> <nop>
+map <C-ScrollWheelUp> <nop>
+map <ScrollWheelDown> <nop>
+map <S-ScrollWheelDown> <nop>
+map <C-ScrollWheelDown> <nop>
+" }}}
+" Nerdtree {{{
+				" toggle Nerdtree
+nnoremap <silent> <C-n>      :NERDTreeToggle<CR>
+vnoremap <silent> <C-n>      :NERDTreeToggle<CR>
+inoremap <silent> <C-n> <C-o>:NERDTreeToggle<CR>
+" }}}
+" Gundo {{{
+				" toggle Gundo
+nnoremap <silent> <C-g>      :GundoToggle<CR>
+vnoremap <silent> <C-g>      :GundoToggle<CR>
+inoremap <silent> <C-g> <C-o>:GundoToggle<CR>
+" }}}
+" }}}
+
+" FILES - settings for files {{{
+filetype plugin indent on	" enable filetype detection
+if !empty(glob('/usr/bin/zsh'))	" use glorious zsh if available
+	set shell=/usr/bin/zsh
+endif
+" C code {{{
+augroup filetype_c		" auto commands for c code
+	autocmd!
+	autocmd filetype c
+	\	setlocal shiftwidth=8
+	\|	setlocal softtabstop=8
+	\|	setlocal noexpandtab
+	\|	setlocal listchars+=tab:\|\ 
+	\|	setlocal foldmethod=syntax
+	\|	setlocal foldtext=CustomCFolding()
+"	\|	highlight link Folded Normal
+augroup END
+" }}}
+" Python code {{{
+augroup filetype_python		" auto commands for python code
+	autocmd!
+	autocmd filetype python
+	\	setlocal shiftwidth=4
+	\|	setlocal softtabstop=4
+	\|	setlocal expandtab
+	\|	setlocal foldmethod=indent
+	\|	setlocal foldtext=CustomPythonFolding()
+"	\|	highlight link Folded Normal
+augroup END
+" }}}
+" Vim {{{
+augroup filetype_vim		" autocommands for configfiles
+	autocmd!
+	autocmd filetype vim
+	\	setlocal foldmethod=marker
+	\|	setlocal foldtext=CustomMarkerFolding()
+augroup END
+" }}}
+" Help {{{
+augroup filetype_help
+	autocmd!
+	autocmd filetype help
+	\	noremap t <C-]>
+	\|	noremap T <C-t>
+augroup END
+" }}}
+" Configfiles {{{
+augroup filetype_configfile	" autocommands for configfiles
+	autocmd!
+	autocmd bufread,bufnewfile *rc
+	\	setlocal foldmethod=marker
+"	\|	setlocal foldtext=CustomMarkerFolding()
+"	\|	highlight! Folded ctermbg=
+augroup END
+" }}}
+" }}}
+
+" PLUGINS - settings for plugins {{{
+" Nerdtree {{{
+augroup plugin_nerdtree		" auto commands for nerdtree
+	autocmd!
+				" close nerdtree if its the only buffer left
+	autocmd bufenter *
+	\	if(winnr("$") == 1
+	\	&& exists("b:NERDTree")
+	\	&& b:NERDTree.isTabTree())
+	\|		q
+	\|	endif
+augroup END
+" }}}
+" Airline {{{
+augroup plugin_airline		" auto commands for ailrline
+	autocmd!
+				" update git branch in status line
+	autocmd vimenter,shellcmdpost *
+	\	let g:current_git_branch = StatuslineGitBranch()
+				" disable the trailing whitespace check
+	autocmd vimenter *
+	\	silent!
+	\|	AirlineToggleWhitespace
+	\|	redraw!
+augroup END
+" }}}
+" Gundo {{{
+if has('python3')		" use python 3 if available
+	let g:gundo_prefer_python3 = 1
+endif
+				" map movement keys one to the right
+let g:gundo_map_move_newer='l'
+let g:gundo_map_move_older='k'
+				" close split when its unfocused again
+let g:gundo_return_on_revert=1
+" }}}
+" }}}
+
+" CHEATSHEET - important commands in one place {{{
+" }}}

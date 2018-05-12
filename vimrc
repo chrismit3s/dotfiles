@@ -24,6 +24,13 @@ set mousehide			" hide the cursor
 set autoindent			" copy indentation of previous line
 set tabstop=8			" should not be changed
 " }}}
+" Behavior {{{
+augroup start_in_insert		" start in insert mode when creating a new file
+	autocmd!
+	autocmd bufnewfile *
+	\	startinsert
+augroup END
+" }}}
 " }}}
 
 " UI - how everything looks {{{

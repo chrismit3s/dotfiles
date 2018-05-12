@@ -1,11 +1,6 @@
 " TODO - things to do {{{
-"  !![_] fix CustomMarkerFold()
-"   ![_] better mappings for splits and folds
-"    [_] add cheatsheet for commands
 "    [_] text fold funtion for python with foldexpr (https://bit.ly/2FUqkVp)
-"    [_] modify s/S so it works in visual block mode
 " }}}
-
 " GENERAL - basic settings {{{
 call pathogen#infect()		" load all plugins/colorschemes
 set lazyredraw			" only redraw when needed
@@ -32,7 +27,6 @@ augroup start_in_insert		" start in insert mode when creating a new file
 augroup END
 " }}}
 " }}}
-
 " UI - how everything looks {{{
 " Vim {{{
 syntax on			" enable syntax highlighting
@@ -65,7 +59,6 @@ let g:airline_section_y='Ln:%l/%L Col:%c'
 let g:airline_section_z='%3l|%-2c'
 " }}}
 " }}}
-
 " FUNCTIONS - all functions {{{
 " General {{{
 function! GetString(len, char)	" returns a string containing char len times
@@ -109,11 +102,10 @@ function! CustomCFolding()	" returns folded line for c-like languages
 
 	" concat start/end
 	let l:start = l:start . '{ ' . l:lines . ' } '
-	echom l:start
 	let l:end = ' ' . l:lines . ' '
 
 	" get padding
-	let l:pad_len = 
+	let l:pad_len =
 \		  winwidth(0)
 \		- strlen(l:start)
 \		- strlen(l:end)
@@ -128,7 +120,7 @@ endfunction
 function! CustomPythonFolding()	" returns folded line for python
 	" get start
 	let l:start = getline(v:foldstart - 1)
-	let l:start = matchstr(l:start, '^\([^:]\+\):')
+	let l:start = matchstr(l:start, '^[^:]\+')
 
 	" calc folded lines
 	let l:lines = v:foldend - v:foldstart + 1
@@ -153,67 +145,65 @@ function! CustomPythonFolding()	" returns folded line for python
 endfunction
 function! CustomMarkerFolding()
 	" get start
-	let l:start = getline(v:foldstart - 1)
+	let l:start = getline(v:foldstart)
+
+	" calc folded lines
 	let l:lines = v:foldend - v:foldstart + 1
-	let l:lines = l:lines . ' line' . ((l:lines == 1)?(''):('s'))
+	let l:lines =
+\		  ' '
+\		. l:lines
+\		. ' line'
+\		. ((l:lines == 1)?(''):('s'))
+\		. ' '
 
-	if(match(l:start, '^[\S\W\D]{1,3} [^-]- [^{]{'))
-		" Large header: com head - end {_{
-		" get com
-		let l:com = GetMatchGroup(
-\			l:start,
-\			'^\([\S\W\D]\+\) [^-]- [^{]{')
-		echom 'COM #' . l:com . '#'
-
-		" get head
-		let l:head = GetMatchGroup(
-\			l:start,
-\			'^[\S\W\D]\+ \([^-]\)- [^{]{')
-		echom 'HEAD #' . l:head . '#'
-
-		" get end
-		let l:end = GetMatchGroup(
-\			l:start,
-\			'^[\S\W\D]\+ [^-]- \([^{]\){')
-		echom 'END #' . l:end . '#'
+	if (!match(l:start[2:], '[^-]\+-[^{]\+')) " XXXX - yyyy (((
+		echo 'first'
+		" get head and body
+		let l:head = GetMatchGroup(l:start, '^\([^-]\+\)-[^{]\+')
+		let l:body = GetMatchGroup(l:start, '^[^-]\+\(-[^{]\+\)')
 
 		" get first padding
 		let l:pad_len =
-			  13
+\			  13
 \			- strlen(l:head)
-		echom 'PAD1 #' . l:pad_len . '#'
 		let l:pad1 = GetString(l:pad_len, ' ')
 
 		" get second padding
 		let l:pad_len =
 \			  winwidth(0)
-\			- strlen(l:com)
 \			- strlen(l:head)
-\			- strlen(l:end)
+\			- strlen(l:body)
 \			- strlen(l:pad1)
+\			- strlen(l:lines)
+\			- &numberwidth
+\			- &foldcolumn
+\			- 1
+		let l:pad2 = GetString(l:pad_len, '-')
+
+		" return complete line
+		return l:head . l:pad1 . l:body . l:pad2 . l:lines
+	else " Xxxx (((
+		echo 'second'
+		" concat start/end
+		let l:start = GetMatchGroup(l:start, '^\([^{]\+\)')
+		let l:end = ' ' . l:lines . ' '
+
+		" get padding
+		let l:pad_len =
+\			  winwidth(0)
+\			- strlen(l:start)
 \			- strlen(l:end)
 \			- &numberwidth
 \			- &foldcolumn
 \			- 1
-		echom 'PAD2 #' . l:pad_len . '#'
-		let l:pad2 = GetString(l:pad_len, '-')
+		let l:pad = GetString(l:pad_len, '-')
 
-		return
-\			  l:head
-\			. l:pad1
-\			. l:end
-\			. l:pad2
-\			. ' line'
-\			. ((l:lines == 1)?(''):('s'))
-\			. ' '
-	else
-		echom 'false'
-		" Small header: Xxxx {_{
+		" return complete line
+		return l:start . l:pad . l:end
 	endif
 endfunction
 " }}}
 " }}}
-
 " TOOLS - how tools behave {{{
 " Folding {{{
 set foldcolumn=5		" add column for fold information
@@ -227,7 +217,6 @@ set ignorecase			" ignore case when searching
 set smartcase			" only if there are no capital letters in querry
 " }}}
 " }}}
-
 " MAPPINGS - commands for editing {{{
 let mapleader=','		" set <leader> key
 				" insert single character with s/S
@@ -239,7 +228,6 @@ vnoremap S A<Space><Esc>gvr
 nnoremap U <C-R>
 				" copy from cursor to end of line with Y like D
 nmap Y yE
-" Movement {{{
 " Cursor {{{
 				" map movement characters one to the right
 nnoremap j h
@@ -294,35 +282,33 @@ inoremap <C-k> <C-o><C-y>
 " Splits {{{
 set splitright			" open new splits on the right
 				" cycle through spilts
-nnoremap <leader>wn      <C-w>w
-onoremap <leader>wn      <C-w>w
-inoremap <leader>wn <C-o><C-w>w
-nnoremap <leader>wp      <C-w>W
-onoremap <leader>wp      <C-w>W
-inoremap <leader>wp <C-o><C-w>W
-				" easier navigations
-nnoremap <leader>wj <C-W>h
-nnoremap <leader>wk <C-W>j
-nnoremap <leader>wl <C-W>k
-nnoremap <leader>wö <C-W>l
+nnoremap <leader>s      <C-w>w
+onoremap <leader>s      <C-w>w
+inoremap <leader>s <C-o><C-w>w
+				" other movements with <leader>W
+nnoremap <leader>S      <C-w>
+onoremap <leader>S      <C-w>
+inoremap <leader>S <C-o><C-w>
 " }}}
 " Tabs {{{
 				" cycle through tabs
-nnoremap <leader>tn      :tabnext<CR>
-onoremap <leader>tn      :tabnext<CR>
-inoremap <leader>tn <C-o>:tabnext<CR>
-nnoremap <leader>tp      :tabnext<CR>
-onoremap <leader>tp      :tabnext<CR>
-inoremap <leader>tp <C-o>:tabnext<CR>
-" }}}
+nnoremap <leader>t       :tabnext<CR>
+onoremap <leader>t       :tabnext<CR>
+inoremap <leader>t  <C-o>:tabnext<CR>
+nnoremap <leader>Tn      :tabnext<CR>
+onoremap <leader>Tn      :tabnext<CR>
+inoremap <leader>Tn <C-o>:tabnext<CR>
+nnoremap <leader>Tp      :tabprevious<CR>
+onoremap <leader>Tp      :tabprevious<CR>
+inoremap <leader>Tp <C-o>:tabprevious<CR>
 " }}}
 " Folding {{{
 				" toggle/open/close folds fast
-nnoremap <leader>ff za
-nnoremap <leader>fo zo
-nnoremap <leader>fc zc
-nnoremap <leader>fO zR
-nnoremap <leader>fC zM
+nnoremap <leader>f  za
+nnoremap <leader>Fo zo
+nnoremap <leader>Fc zc
+nnoremap <leader>FO zR
+nnoremap <leader>FC zM
 " }}}
 " Searching {{{
 				" turn off search highlight
@@ -345,17 +331,18 @@ inoremap <silent> <C-n> <C-o>:NERDTreeToggle<CR>
 " }}}
 " Gundo {{{
 				" toggle Gundo
-nnoremap <silent> <C-g>      :GundoToggle<CR>
-vnoremap <silent> <C-g>      :GundoToggle<CR>
-inoremap <silent> <C-g> <C-o>:GundoToggle<CR>
+nnoremap <silent> <C-u>      :GundoToggle<CR>
+vnoremap <silent> <C-u>      :GundoToggle<CR>
+inoremap <silent> <C-u> <C-o>:GundoToggle<CR>
 " }}}
 " }}}
-
 " FILES - settings for files {{{
+" General {{{
 filetype plugin indent on	" enable filetype detection
 if !empty(glob('/usr/bin/zsh'))	" use glorious zsh if available
 	set shell=/usr/bin/zsh
 endif
+" }}}
 " C code {{{
 augroup filetype_c		" auto commands for c code
 	autocmd!
@@ -366,7 +353,9 @@ augroup filetype_c		" auto commands for c code
 	\|	setlocal listchars+=tab:\|\ 
 	\|	setlocal foldmethod=syntax
 	\|	setlocal foldtext=CustomCFolding()
-"	\|	highlight link Folded Normal
+"	\|	if(g:colors_name == 'deus')
+"	\|		highlight! Folded ctermbg=236
+"	\|	endif
 augroup END
 " }}}
 " Python code {{{
@@ -378,15 +367,21 @@ augroup filetype_python		" auto commands for python code
 	\|	setlocal expandtab
 	\|	setlocal foldmethod=indent
 	\|	setlocal foldtext=CustomPythonFolding()
-"	\|	highlight link Folded Normal
+"	\|	if(g:colors_name == 'deus')
+"	\|		highlight! Folded ctermbg=236
+"	\|	endif
 augroup END
 " }}}
 " Vim {{{
-augroup filetype_vim		" autocommands for configfiles
+augroup filetype_vim		" autocommands for vim(script) files
 	autocmd!
 	autocmd filetype vim
 	\	setlocal foldmethod=marker
 	\|	setlocal foldtext=CustomMarkerFolding()
+	\|	setlocal foldlevel=0
+"	\|	if(g:colors_name == 'deus')
+"	\|		highlight! Folded ctermbg=236
+"	\|	endif
 augroup END
 " }}}
 " Help {{{
@@ -402,12 +397,14 @@ augroup filetype_configfile	" autocommands for configfiles
 	autocmd!
 	autocmd bufread,bufnewfile *rc
 	\	setlocal foldmethod=marker
-"	\|	setlocal foldtext=CustomMarkerFolding()
-"	\|	highlight! Folded ctermbg=
+	\|	setlocal foldtext=CustomMarkerFolding()
+	\|	setlocal foldlevel=0
+"	\|	if(g:colors_name == 'deus')
+"	\|		highlight! Folded ctermbg=236
+"	\|	endif
 augroup END
 " }}}
 " }}}
-
 " PLUGINS - settings for plugins {{{
 " Nerdtree {{{
 augroup plugin_nerdtree		" auto commands for nerdtree
@@ -445,6 +442,24 @@ let g:gundo_map_move_older='k'
 let g:gundo_return_on_revert=1
 " }}}
 " }}}
-
 " CHEATSHEET - important commands in one place {{{
+" Plugins {{{
+" Toggle Nerdtree:	ctrl-n
+" Toggle Undotree:	ctrl-u
+" }}}
+" Movement {{{
+" Normal:		jklö
+" Fast:			JKLÖ
+" End Of Word:		e
+" End Of Line:		E
+" Begin Of Word:	b
+" Begin Of Line:	B
+" Page Scroll:		ctrl-kl
+" }}}
+" Tabs and Splits {{{
+" Cycle Splits:		leader-s
+" Cycle Tabs:		leader-t
+" Other Split Commands:	leader-S
+" Other Tab Commands:	leader-T
+" }}}
 " }}}

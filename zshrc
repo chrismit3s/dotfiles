@@ -24,7 +24,7 @@ source $ZSH/oh-my-zsh.sh	# source oh-my-zsh
 # }}}
 # ALIASES {{{
 # del {{{
-if ! dpkg -s 'trash-cli' > /dev/null; then
+if dpkg -s 'trash-cli' > /dev/null; then
 	alias del='trash-put'	# delete to trash
 fi
 # }}}

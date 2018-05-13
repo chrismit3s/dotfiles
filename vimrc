@@ -28,7 +28,6 @@ augroup END
 " }}}
 " }}}
 " UI - how everything looks {{{
-" Vim {{{
 syntax on			" enable syntax highlighting
 colorscheme deus		" nice gruvbox-like colorscheme
 set background=dark		" nightmode
@@ -43,7 +42,6 @@ set colorcolumn=81		" highlight 81st column grey
 				" highlight characters after the 80th
 highlight OverLength ctermbg=red ctermfg=lightgrey
 match OverLength /\%81v.\+/
-" }}}
 " Airline {{{
 let g:airline_powerline_fonts=1	" use powerline fonts
 if exists('g:colors_name')	" use colorscheme as airline theme if available
@@ -60,7 +58,6 @@ let g:airline_section_z='%3l|%-2c'
 " }}}
 " }}}
 " FUNCTIONS - all functions {{{
-" General {{{
 function! GetString(len, char)	" returns a string containing char len times
 	let l:string = ''
 
@@ -74,11 +71,10 @@ function! GetString(len, char)	" returns a string containing char len times
 	" return it
 	return l:string
 endfunction
-				" return the first captured group of a regex
-function! GetMatchGroup(expr, pattern)
-	return filter(matchlist(a:expr, a:pattern), '!empty(v:val)')[1]
+				" return the n-th captured group of a regex
+function! GetMatchGroup(expr, pattern, n)
+	return filter(matchlist(a:expr, a:pattern), '!empty(v:val)')[a:n]
 endfunction
-" }}}
 " Git branch {{{
 function! GetGitBranch()	" returns current git branch
 	return system(
@@ -91,64 +87,41 @@ function! StatuslineGitBranch()	" returns git branch ready for the statusline
 endfunction
 " }}}
 " Text folds {{{
+" CustomCFolding() {{{
 function! CustomCFolding()	" returns folded line for c-like languages
 	" get start
 	let l:start = getline(v:foldstart)
 	let l:start = matchstr(l:start, '^[^{]\+')
 
 	" calc folded lines
-	let l:lines = v:foldend - v:foldstart + 1
+	let l:lines = v:foldend - v:foldstart
 	let l:lines = l:lines . ' line' . ((l:lines == 1)?(''):('s'))
 
 	" concat start/end
 	let l:start = l:start . '{ ' . l:lines . ' } '
-	let l:end = ' ' . l:lines . ' '
+	let l:lines =
+\		  ' '
+\		. l:lines
+\		. ' line'
+\		. ((l:lines == 1)?(' '):('s'))
+\		. ' '
 
-	" get padding
-	let l:pad_len =
-\		  winwidth(0)
-\		- strlen(l:start)
-\		- strlen(l:end)
-\		- &numberwidth
-\		- &foldcolumn
-\		- 1
+	" get padding (87 so that the 'lines' is after the color column)
+	let l:pad_len = 87 - strlen(l:start . l:lines)
 	let l:pad = GetString(l:pad_len, '-')
 
 	" return complete line
-	return l:start . l:pad . l:end
+	return l:start . l:pad . l:lines
 endfunction
+" }}}
+" CustomPythonFolding() {{{
 function! CustomPythonFolding()	" returns folded line for python
 	" get start
 	let l:start = getline(v:foldstart - 1)
 	let l:start = matchstr(l:start, '^[^:]\+')
 
 	" calc folded lines
-	let l:lines = v:foldend - v:foldstart + 1
-	let l:lines = l:lines . ' line' . ((l:lines == 1)?(''):('s'))
-
-	" concat start/end
-	let l:start = l:start . ': (' . l:lines . ') '
-	let l:end = ' ' . l:lines . ' '
-
-	" get padding
-	let l:pad_len =
-\		  winwidth(0)
-\		- strlen(l:start)
-\		- strlen(l:end)
-\		- &numberwidth
-\		- &foldcolumn
-\		- 1
-	let l:pad = GetString(l:pad_len, '-')
-
-	" return complete line
-	return l:start . l:pad . l:end
-endfunction
-function! CustomMarkerFolding()
-	" get start
-	let l:start = getline(v:foldstart)
-
-	" calc folded lines
-	let l:lines = v:foldend - v:foldstart + 1
+	let l:lines = v:foldend - v:foldstart
 	let l:lines =
 \		  ' '
 \		. l:lines
@@ -156,52 +129,60 @@ function! CustomMarkerFolding()
 \		. ((l:lines == 1)?(''):('s'))
 \		. ' '
 
-	if (!match(l:start[2:], '[^-]\+-[^{]\+')) " XXXX - yyyy (((
-		echo 'first'
+	" Concat them to start
+	let l:start = l:start . ': (' . l:lines . ') '
+
+	" get padding (87 so that the 'lines' is after the color column)
+	let l:pad_len = 87 - strlen(l:start . l:lines)
+	let l:pad = GetString(l:pad_len, '-')
+
+	" return complete line
+	return l:start . l:pad . l:lines
+endfunction
+" }}}
+" CustomMarkerFolding() {{{
+function! CustomMarkerFolding()
+	" get start
+	let l:start = getline(v:foldstart)
+
+	" calc folded lines
+	let l:lines = v:foldend - v:foldstart
+	let l:lines =
+\		  ' '
+\		. l:lines
+\		. ' line'
+\		. ((l:lines == 1)?(''):('s'))
+\		. ' '
+
+	if (!match(l:start, '^.{2}[^-]\+-[^{]\+')) " XXXX - yyyy (((
 		" get head and body
-		let l:head = GetMatchGroup(l:start, '^\([^-]\+\)-[^{]\+')
-		let l:body = GetMatchGroup(l:start, '^[^-]\+\(-[^{]\+\)')
+		let l:head = GetMatchGroup(l:start, '^\(.{2}[^-]\+\)-[^{]\+', 1)
+		let l:body = GetMatchGroup(l:start, '^.{2}[^-]\+\(-[^{]\+\)', 1)
 
 		" get first padding
-		let l:pad_len =
-\			  13
-\			- strlen(l:head)
+		let l:pad_len = 13 - strlen(l:head)
 		let l:pad1 = GetString(l:pad_len, ' ')
 
-		" get second padding
-		let l:pad_len =
-\			  winwidth(0)
-\			- strlen(l:head)
-\			- strlen(l:body)
-\			- strlen(l:pad1)
-\			- strlen(l:lines)
-\			- &numberwidth
-\			- &foldcolumn
-\			- 1
+		" get second  padding  (87 so  that  the  'lines'  is after  the
+		" color column)
+		let l:pad_len = 87 - strlen(l:head . l:body . l:pad1 . l:lines)
 		let l:pad2 = GetString(l:pad_len, '-')
 
 		" return complete line
 		return l:head . l:pad1 . l:body . l:pad2 . l:lines
 	else " Xxxx (((
-		echo 'second'
 		" concat start/end
-		let l:start = GetMatchGroup(l:start, '^\([^{]\+\)')
-		let l:end = ' ' . l:lines . ' '
+		let l:start = GetMatchGroup(l:start, '^\([^{]\+\)', 1)
 
 		" get padding
-		let l:pad_len =
-\			  winwidth(0)
-\			- strlen(l:start)
-\			- strlen(l:end)
-\			- &numberwidth
-\			- &foldcolumn
-\			- 1
+		let l:pad_len = 87 - strlen(l:start . l:lines)
 		let l:pad = GetString(l:pad_len, '-')
 
 		" return complete line
-		return l:start . l:pad . l:end
+		return l:start . l:pad . l:lines
 	endif
 endfunction
+" }}}
 " }}}
 " }}}
 " TOOLS - how tools behave {{{
@@ -292,15 +273,15 @@ inoremap <leader>S <C-o><C-w>
 " }}}
 " Tabs {{{
 				" cycle through tabs
-nnoremap <leader>t       :tabnext<CR>
-onoremap <leader>t       :tabnext<CR>
-inoremap <leader>t  <C-o>:tabnext<CR>
-nnoremap <leader>Tn      :tabnext<CR>
-onoremap <leader>Tn      :tabnext<CR>
-inoremap <leader>Tn <C-o>:tabnext<CR>
-nnoremap <leader>Tp      :tabprevious<CR>
-onoremap <leader>Tp      :tabprevious<CR>
-inoremap <leader>Tp <C-o>:tabprevious<CR>
+nnoremap <silent> <leader>t       :tabnext<CR>
+onoremap <silent> <leader>t       :tabnext<CR>
+inoremap <silent> <leader>t  <C-o>:tabnext<CR>
+nnoremap <silent> <leader>Tn      :tabnext<CR>
+onoremap <silent> <leader>Tn      :tabnext<CR>
+inoremap <silent> <leader>Tn <C-o>:tabnext<CR>
+nnoremap <silent> <leader>Tp      :tabprevious<CR>
+onoremap <silent> <leader>Tp      :tabprevious<CR>
+inoremap <silent> <leader>Tp <C-o>:tabprevious<CR>
 " }}}
 " Folding {{{
 				" toggle/open/close folds fast
@@ -312,7 +293,7 @@ nnoremap <leader>FC zM
 " }}}
 " Searching {{{
 				" turn off search highlight
-nnoremap <silent> <leader>s :nohlsearch<CR>
+nnoremap <silent> <leader>h :nohlsearch<CR>
 " }}}
 " Mouse {{{
 				" disable mouse wheel scroll
@@ -337,12 +318,10 @@ inoremap <silent> <C-u> <C-o>:GundoToggle<CR>
 " }}}
 " }}}
 " FILES - settings for files {{{
-" General {{{
 filetype plugin indent on	" enable filetype detection
 if !empty(glob('/usr/bin/zsh'))	" use glorious zsh if available
 	set shell=/usr/bin/zsh
 endif
-" }}}
 " C code {{{
 augroup filetype_c		" auto commands for c code
 	autocmd!
@@ -399,9 +378,9 @@ augroup filetype_configfile	" autocommands for configfiles
 	\	setlocal foldmethod=marker
 	\|	setlocal foldtext=CustomMarkerFolding()
 	\|	setlocal foldlevel=0
-"	\|	if(g:colors_name == 'deus')
-"	\|		highlight! Folded ctermbg=236
-"	\|	endif
+	\|	if(g:colors_name == 'deus')
+	\|		highlight! Folded ctermbg=235
+	\|	endif
 augroup END
 " }}}
 " }}}
@@ -461,5 +440,9 @@ let g:gundo_return_on_revert=1
 " Cycle Tabs:		leader-t
 " Other Split Commands:	leader-S
 " Other Tab Commands:	leader-T
+" }}}
+" Undo and Redo {{{
+" Undo:			u
+" Redo:			U
 " }}}
 " }}}

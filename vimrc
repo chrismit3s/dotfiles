@@ -154,10 +154,10 @@ function! CustomMarkerFolding()
 \		. ((l:lines == 1)?(''):('s'))
 \		. ' '
 
-	if (!match(l:start, '^.{2}[^-]\+-[^{]\+')) " XXXX - yyyy (((
+	if (!match(l:start, '^[^-]\+-[^{]\+')) " XXXX - yyyy (((
 		" get head and body
-		let l:head = GetMatchGroup(l:start, '^\(.{2}[^-]\+\)-[^{]\+', 1)
-		let l:body = GetMatchGroup(l:start, '^.{2}[^-]\+\(-[^{]\+\)', 1)
+		let l:head = GetMatchGroup(l:start, '^\([^-]\+\)-[^{]\+', 1)
+		let l:body = GetMatchGroup(l:start, '^[^-]\+\(-[^{]\+\)', 1)
 
 		" get first padding
 		let l:pad_len = 13 - strlen(l:head)
@@ -346,6 +346,19 @@ augroup filetype_python		" auto commands for python code
 	\|	setlocal expandtab
 	\|	setlocal foldmethod=indent
 	\|	setlocal foldtext=CustomPythonFolding()
+"	\|	if(g:colors_name == 'deus')
+"	\|		highlight! Folded ctermbg=236
+"	\|	endif
+augroup END
+" }}}
+" Html and Php code {{{
+augroup filetype_html_php	" auto commands for html and php code
+	autocmd!
+	autocmd filetype html,php
+	\	setlocal shiftwidth=4
+	\|	setlocal softtabstop=4
+	\|	setlocal expandtab
+	\|	setlocal foldmethod=indent
 "	\|	if(g:colors_name == 'deus')
 "	\|		highlight! Folded ctermbg=236
 "	\|	endif

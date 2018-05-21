@@ -29,7 +29,7 @@ if dpkg -s 'trash-cli' > /dev/null; then
 fi
 # }}}
 # python {{{
-if ! dpkg -s 'python3' > /dev/null; then
+if dpkg -s 'python3' > /dev/null; then
 	alias python='python3'	# use python 3
 fi
 # }}}

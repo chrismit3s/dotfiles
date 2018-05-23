@@ -107,7 +107,7 @@ function! CustomCFolding()	" returns folded line for c-like languages
 \		. ' '
 
 	" get padding (87 so that the 'lines' is after the color column)
-	let l:pad_len = 87 - strlen(l:start . l:lines)
+	let l:pad_len = 81 - strlen(l:start . l:lines)
 	let l:pad = GetString(l:pad_len, '-')
 
 	" return complete line
@@ -117,7 +117,7 @@ endfunction
 " CustomPythonFolding() {{{
 function! CustomPythonFolding()	" returns folded line for python
 	" get start
-	let l:start = getline(v:foldstart - 1)
+	let l:start = getline(v:foldstart)
 	let l:start = matchstr(l:start, '^[^:]\+')
 
 	" calc folded lines
@@ -132,8 +132,8 @@ function! CustomPythonFolding()	" returns folded line for python
 	" Concat them to start
 	let l:start = l:start . ': (' . l:lines . ') '
 
-	" get padding (87 so that the 'lines' is after the color column)
-	let l:pad_len = 87 - strlen(l:start . l:lines)
+	" get padding
+	let l:pad_len = 81 - strlen(l:start . l:lines)
 	let l:pad = GetString(l:pad_len, '-')
 
 	" return complete line
@@ -141,7 +141,7 @@ function! CustomPythonFolding()	" returns folded line for python
 endfunction
 " }}}
 " CustomMarkerFolding() {{{
-function! CustomMarkerFolding()
+function! CustomMarkerFolding()	" returns folded line for marker folding
 	" get start
 	let l:start = getline(v:foldstart)
 
@@ -160,12 +160,11 @@ function! CustomMarkerFolding()
 		let l:body = GetMatchGroup(l:start, '^[^-]\+\(-[^{]\+\)', 1)
 
 		" get first padding
-		let l:pad_len = 13 - strlen(l:head)
+		let l:pad_len = 14 - strlen(l:head)
 		let l:pad1 = GetString(l:pad_len, ' ')
 
-		" get second  padding  (87 so  that  the  'lines'  is after  the
-		" color column)
-		let l:pad_len = 87 - strlen(l:head . l:body . l:pad1 . l:lines)
+		" get second  padding
+		let l:pad_len = 81 - strlen(l:head . l:body . l:pad1 . l:lines)
 		let l:pad2 = GetString(l:pad_len, '-')
 
 		" return complete line
@@ -175,12 +174,38 @@ function! CustomMarkerFolding()
 		let l:start = GetMatchGroup(l:start, '^\([^{]\+\)', 1)
 
 		" get padding
-		let l:pad_len = 87 - strlen(l:start . l:lines)
+		let l:pad_len = 81 - strlen(l:start . l:lines)
 		let l:pad = GetString(l:pad_len, '-')
 
 		" return complete line
 		return l:start . l:pad . l:lines
 	endif
+endfunction
+" }}}
+" CustomSyntaxFolding() {{{
+function! CustomSyntaxFolding()	" returns folded line for syntax folding
+	" get start
+	let l:start = getline(v:foldstart) . getline(v:foldend)
+
+	" calc folded lines
+	let l:lines = v:foldend - v:foldstart
+	let l:lines = l:lines . ' line' . ((l:lines == 1)?(''):('s'))
+
+	" concat start/end
+	let l:start = l:start . '{ ' . l:lines . ' } '
+	let l:lines =
+\		  ' '
+\		. l:lines
+\		. ' line'
+\		. ((l:lines == 1)?(' '):('s'))
+\		. ' '
+
+	" get padding (87 so that the 'lines' is after the color column)
+	let l:pad_len = 81 - strlen(l:start . l:lines)
+	let l:pad = GetString(l:pad_len, '-')
+
+	" return complete line
+	return l:start . l:pad . l:lines
 endfunction
 " }}}
 " }}}
@@ -189,7 +214,9 @@ endfunction
 " Folding {{{
 set foldcolumn=5		" add column for fold information
 set foldmethod=syntax		" fold lines syntax-based
-set foldlevelstart=4		" start with 4 open folds
+				" custom foldfunction for syntaxfolding
+set foldtext=CustomSyntaxFolding()
+set foldlevelstart=5		" start with 5 open folds
 " }}}
 " Searching {{{
 set incsearch			" search as charcters are entered

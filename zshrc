@@ -43,3 +43,9 @@ alias la='LC_COLLATE=C ls -Albh --color'
 alias lm='LC_COLLATE=C ls -Alh --color'
 # }}}
 # }}}
+# FUNCTIONS {{{
+funtion cddir() {
+	mkdir $1
+	cd $1
+}
+# }}}

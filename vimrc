@@ -106,7 +106,7 @@ function! CustomCFolding()	" returns folded line for c-like languages
 \		. ((l:lines == 1)?(' '):('s'))
 \		. ' '
 
-	" get padding (87 so that the 'lines' is after the color column)
+	" get padding (81 so that the 'lines' is after the color column)
 	let l:pad_len = 81 - strlen(l:start . l:lines)
 	let l:pad = GetString(l:pad_len, '-')
 
@@ -200,7 +200,7 @@ function! CustomSyntaxFolding()	" returns folded line for syntax folding
 \		. ((l:lines == 1)?(' '):('s'))
 \		. ' '
 
-	" get padding (87 so that the 'lines' is after the color column)
+	" get padding
 	let l:pad_len = 81 - strlen(l:start . l:lines)
 	let l:pad = GetString(l:pad_len, '-')
 

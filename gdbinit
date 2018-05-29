@@ -1,2 +1,2 @@
-source ~/.pwndbg/gdbinit.py
+source /etc/pwndbg
 set disassembly-flavor intel

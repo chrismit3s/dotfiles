@@ -322,6 +322,10 @@ nnoremap <leader>FC zM
 				" turn off search highlight
 nnoremap <silent> <leader>h :nohlsearch<CR>
 " }}}
+" Macros {{{
+				" easier macro use
+nmap <leader>m @
+" }}}
 " Mouse {{{
 				" disable mouse wheel scroll
 map <ScrollWheelUp> <nop>

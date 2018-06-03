@@ -24,14 +24,10 @@ source $ZSH/oh-my-zsh.sh	# source oh-my-zsh
 # }}}
 # ALIASES {{{
 # del {{{
-if dpkg -s 'trash-cli' > /dev/null; then
-	alias del='trash-put'	# delete to trash
-fi
+alias del='trash-put'	# delete to trash
 # }}}
 # python {{{
-if dpkg -s 'python3' > /dev/null; then
-	alias python='python3'	# use python 3
-fi
+alias python='python3'	# use python 3
 # }}}
 # gdb {{{
 alias gdbg='gcc -Og -Wall'	# gcc debug

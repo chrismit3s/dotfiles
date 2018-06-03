@@ -5,7 +5,6 @@ setopt beep			# enable error beep
 # ENVIRONMENT VARIABLES {{{
 export PATH=$PATH:$HOME/bin	# add user bin directory to path
 export ZDOTDIR=$HOME/.zsh	# use .zsh as dotfiles dir
-export XAUTHORITY=$HOME/.xauthority
 # }}}
 # HISTORY {{{
 HISTFILE=$HOME/.zsh_history	# save history in $HOME

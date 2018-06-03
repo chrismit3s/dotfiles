@@ -1,0 +1,36 @@
+﻿" #### CVIMRC NOT VIMRC #### "
+let configpath='C:/Users/Chrissidtmeier/.cvimrc'
+set localconfig
+set noautofocus
+unmap a
+command g tabnew google		" new command g to search with google
+set incsearch			" search as charcters are entered
+set ignorecase			" ignore case when searching
+set smartcase			" only if there are no capital letters in querry
+let mapleader=','		" set the mapleader
+				" copy from cursor to end of line with Y like D
+map Y yE
+				" map movement characters on page one to the right
+unmap h j k l
+map j scrollLeft
+map k :execute s<CR>
+map l :execute w<CR>
+map ö scrollRight
+				" map movement characters on tabs one to the right
+unmap H J K L
+map J :execute S<CR>
+map K :tabprevious<CR>
+map L :tabnext<CR>
+map Ö :execute D<CR>
+				" move with B/E on page
+unmap 0 $
+map B scrollToLeft
+map E scrollToRight
+				" move with B/E on tabs
+unmap g0 g$
+map gB firstTab
+map gE firstTab
+				" turn off search highlight
+map <leader>h :nohlsearch<CR>
+				" change characters to follow links
+let hintcharacters="asdfjklöqweruiop"

@@ -1,36 +1,45 @@
 ﻿" #### CVIMRC NOT VIMRC #### "
+" GENERAL - basic settings {{{
+set noautofocus			" dont focus textbox on new sites
+" Configfile {{{
 let configpath='C:/Users/Chrissidtmeier/.cvimrc'
-set localconfig
-set noautofocus
-unmap a
-command g tabnew google		" new command g to search with google
+set localconfig			" enable local config
+" }}}
+" }}}
+" TOOLS - how tools behave {{{
+" Searching {{{
 set incsearch			" search as charcters are entered
 set ignorecase			" ignore case when searching
 set smartcase			" only if there are no capital letters in querry
-let mapleader=','		" set the mapleader
-				" copy from cursor to end of line with Y like D
-map Y yE
-				" map movement characters on page one to the right
-unmap h j k l
-map j scrollLeft
-map k :execute s<CR>
-map l :execute w<CR>
-map ö scrollRight
-				" map movement characters on tabs one to the right
-unmap H J K L
-map J :execute S<CR>
-map K :tabprevious<CR>
-map L :tabnext<CR>
-map Ö :execute D<CR>
-				" move with B/E on page
-unmap 0 $
-map B scrollToLeft
-map E scrollToRight
-				" move with B/E on tabs
-unmap g0 g$
-map gB firstTab
-map gE firstTab
-				" turn off search highlight
-map <leader>h :nohlsearch<CR>
-				" change characters to follow links
-let hintcharacters="asdfjklöqweruiop"
+" }}}
+" }}}
+" MAPPINGS - commands for editing {{{
+				" unmap keys
+unmap Y J K L Ö j k l ö t b h a ,
+let mapleader=','		" set <leader> key
+map Y yE			" copy from cursor to end of line with Y like D
+" Page Movement {{{
+map J :call scrollLeft<CR>
+map k :call scrollDown<CR>
+map l :call scrollUp<CR>
+map Ö :call scrollRight<CR>
+" }}}
+" Tab Movement {{{
+map j :call previousTab<CR>
+map K :call goBack<CR>
+map L :call goForward<CR>
+map ö :call nextTab<CR>
+" }}}
+" Tab Creation {{{
+map t :tabnew<Space>
+map b :bookmarks<Space>
+" }}}
+" Link/Hint Following {{{
+map f createTabbedHint
+map F createHint
+let hintcharacters='asdf'
+" }}}
+" Searching {{{
+map <leader>h :nohlsearch<CR>	" turn off search highlight
+" }}}
+" }}}

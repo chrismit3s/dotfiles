@@ -5,6 +5,8 @@
 	ui = true
 [format]
 	pretty = oneline
+[core]
+	autocrlf = true
 [url "https://github.com/"]
 	insteadOf = "github:"
 [url "https://gitlab.com/"]

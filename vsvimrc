@@ -90,16 +90,9 @@ inoremap <C-k> <C-o><C-y>
 " Splits {{{
 set splitright			" open new splits on the right
 				" change spilt
-nnoremap <C-j>      <C-w>h
-onoremap <C-j>      <C-w>h
-inoremap <C-j>      <C-w>h
-nnoremap <C-ö>      <C-w>l
-onoremap <C-ö>      <C-w>l
-inoremap <C-ö>      <C-w>l
-				" other movements with <leader>W
-nnoremap <leader>S      <C-w>
-onoremap <leader>S      <C-w>
-inoremap <leader>S <C-o><C-w>
+nnoremap <leader>s      <C-w>l
+onoremap <leader>s      <C-w>l
+inoremap <leader>s <C-o><C-w>l
 " }}}
 " Tabs {{{
 				" cycle through tabs

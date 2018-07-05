@@ -15,7 +15,7 @@ set smartcase			" only if there are no capital letters in querry
 " }}}
 " MAPPINGS - commands for editing {{{
 				" unmap keys
-unmap Y J K L Ö j k l ö t b h a ,
+unmap Y J K L Ö j k l ö t b a ,
 let mapleader=','		" set <leader> key
 map Y yE			" copy from cursor to end of line with Y like D
 " Page Movement {{{
@@ -35,11 +35,12 @@ map t :tabnew<Space>
 map b :bookmarks<Space>
 " }}}
 " Link/Hint Following {{{
-map f createTabbedHint
-map F createHint
+"map f createTabbedHint
+"map F createHint
 let hintcharacters='asdf'
 " }}}
 " Searching {{{
-map <leader>h :nohlsearch<CR>	" turn off search highlight
+				" turn off search highlight
+map <leader>h :nohlsearch<CR>
 " }}}
 " }}}

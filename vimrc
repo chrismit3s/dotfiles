@@ -232,6 +232,9 @@ nnoremap s i<Space><Esc>r
 nnoremap S a<Space><Esc>r
 vnoremap s I<Space><Esc>gvr
 vnoremap S A<Space><Esc>gvr
+				" toggle lower/upper case with leader-c
+nnoremap <leader>c ~
+vnoremap <leader>c ~
 				" shift + undo = redo
 nnoremap U <C-R>
 				" copy from cursor to end of line with Y like D
@@ -264,18 +267,18 @@ onoremap K 3j
 onoremap L 3k
 onoremap Ö 3l
 				" move in line
-nnoremap B ^
+nnoremap B 0
 nnoremap E $
-vnoremap B ^
+vnoremap B 0
 vnoremap E $
-onoremap B ^
+onoremap B 0
 onoremap E $
-				" unmap $/^
-nnoremap ^ <nop>
+				" unmap $/0
+nnoremap 0 <nop>
 nnoremap $ <nop>
-vnoremap ^ <nop>
+vnoremap 0 <nop>
 vnoremap $ <nop>
-onoremap ^ <nop>
+onoremap 0 <nop>
 onoremap $ <nop>
 " }}}
 " Page {{{
@@ -393,6 +396,13 @@ augroup filetype_html_php	" auto commands for html and php code
 "	\|	if(g:colors_name == 'deus')
 "	\|		highlight! Folded ctermbg=236
 "	\|	endif
+augroup END
+" }}}
+" Markdown {{{
+augroup filetype_markdown	" auto commands for markdown editing
+	autocmd!
+	autocmd filetype md
+	\	setlocal wrap
 augroup END
 " }}}
 " Vim {{{

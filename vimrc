@@ -1,4 +1,4 @@
-" TODO - things to do {{{
+﻿" TODO - things to do {{{
 "    [_] text fold funtion for python with foldexpr (https://bit.ly/2FUqkVp)
 " }}}
 " GENERAL - basic settings {{{
@@ -223,6 +223,9 @@ set incsearch			" search as charcters are entered
 set hlsearch			" highlight matches
 set ignorecase			" ignore case when searching
 set smartcase			" only if there are no capital letters in querry
+" }}}
+" Replacing {{{
+set gdefault			" replace all hits in a line
 " }}}
 " }}}
 " MAPPINGS - commands for editing {{{

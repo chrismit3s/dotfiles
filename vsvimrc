@@ -1,6 +1,7 @@
 ﻿" #### VSVIMRC NOT VIMRC #### "
 " GENERAL - basic settings {{{
 set vsvim_useeditorindent	" use editor indent logic
+set vsvim_useeditortab		" use editor tab settings
 set autochdir			" use file path as working directory
 set confirm			" ask to save instead of complaining
 set title			" rename terminal
@@ -9,6 +10,7 @@ set backspace=2			" backspace over everything
 " UI - how everything looks {{{
 set background=dark		" nightmode
 set number			" show line number
+set cursorline
 " }}}
 " TOOLS - how tools behave {{{
 " Folding {{{

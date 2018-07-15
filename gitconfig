@@ -1,17 +1,27 @@
 # public git config
 [user]
 	name = chrismit3s
+[credential]
+	helper = cache --timeout=7200
+
 [color]
 	ui = true
 [format]
 	pretty = oneline
+
 [core]
+	editor = vim
 	autocrlf = true
+
 [url "https://github.com/"]
 	insteadOf = "github:"
 [url "https://gitlab.com/"]
 	insteadOf = "gitlab:"
-[credential]
-	helper = cache --timeout=7200
+
+[alias]
+	d = difftool
+[diff]
+	tool = vimdiff
+
 [include]
 	path = ~/.gitconfig.priv

@@ -7,19 +7,19 @@ symlinked in the $HOME directory, with `setup.sh`.
 
 ## Overview
 
-File/Folder	 | Use
----------------- | ---
-bashrc		 | bash configuration, mostly auto-generated stuff (not used, see zshrc)
-cvimrc		 | config for chrome(ium) vim plugin
-gdbinit		 | gdb config
-gitconfig	 | git config
-setup.(bat|sh)	 | script to set everything up (see Setup)
-vim		 | vim plugins/colorschemes/etc
-vimrc		 | vim config
-vsvimrc		 | config for visual studio vim plugin
-weechat		 | weechat directory
-zsh		 | zsh files like `.zcompdump`, also for oh my zsh
-zshrc		 | zsh config
+File/Folder		 | Use
+-----------------+----
+bashrc           | bash configuration, mostly auto-generated stuff (not used, see zshrc)
+cvimrc           | config for chrome(ium) vim plugin
+gdbinit          | gdb config
+gitconfig        | git config
+setup.(bat|sh)   | script to set everything up (see Setup)
+vim              | vim plugins/colorschemes/etc
+vimrc            | vim config
+vsvimrc          | config for visual studio vim plugin
+weechat          | weechat directory
+zsh              | zsh files like `.zcompdump`, also for oh my zsh
+zshrc            | zsh config
 
 ## Setup
 

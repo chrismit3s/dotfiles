@@ -1,3 +1,5 @@
+MOVED TO https://gitlab.com/chrismit3s/dotfiles
+
 # dotfiles
 
 Here I backup all of my dotfiles (`.vimrc`, `.bashrc`, `.gdbinit`, etc). On my
